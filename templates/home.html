@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Home</title>
+</head>
+<body>
+  <h2>Welcome, {{ username }}!</h2>
+  <p>You are logged in as {{ userrole }}!</p>
+  <a href="{{ url_for('minerals.index') }}">View Minerals</a><br>
+  <a href="{{ url_for('stats.stats_dashboard') }}">View Production Statistics</a><br>
+  <a href="{{ url_for('map.map_dashboard') }}">View Mineral Map</a><br>
+  <a href="{{ url_for('auth.auth_logout') }}">Logout</a>
+</body>
+</html>
