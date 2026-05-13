@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Odyssey Assessment Practice</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161a23;
+    --card: #1e2330;
+    --border: #2a3045;
+    --accent: #4f8ef7;
+    --accent2: #f7a24f;
+    --green: #3ecf8e;
+    --red: #f76f6f;
+    --text: #e8eaf0;
+    --muted: #6b7494;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(13,15,20,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px;
+    gap: 10px;
+  }
+  #topbar h1 { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:var(--accent); white-space:nowrap; }
+  .tb-right { display:flex; align-items:center; gap:8px; }
+  #stopwatch {
+    font-family:'DM Mono',monospace; font-size:14px; color:var(--accent2);
+    background:rgba(247,162,79,0.1); border:1px solid rgba(247,162,79,0.3);
+    border-radius:8px; padding:5px 10px; min-width:72px; text-align:center;
+  }
+  .tb-btn {
+    background:var(--card); border:1px solid var(--border);
+    color:var(--text); border-radius:8px; padding:6px 11px;
+    font-size:12px; font-family:'DM Sans',sans-serif; cursor:pointer;
+    white-space:nowrap;
+  }
+  .tb-btn:active { opacity:0.7; }
+  #sw-btn { background:rgba(78,142,247,0.15); border-color:var(--accent); color:var(--accent); }
+
+  /* ── MENU ── */
+  #menu { padding: 80px 16px 30px; }
+  .menu-title {
+    font-family:'Syne',sans-serif; font-size:26px; font-weight:800;
+    line-height:1.2; margin-bottom:6px;
+  }
+  .menu-sub { color:var(--muted); font-size:13px; margin-bottom:24px; }
+  .game-grid { display:flex; flex-direction:column; gap:12px; }
+  .game-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:16px 18px;
+    display:flex; align-items:center; gap:14px;
+    cursor:pointer; transition:all 0.2s;
+  }
+  .game-card:active { transform:scale(0.98); background:var(--surface); }
+  .game-icon { font-size:28px; flex-shrink:0; }
+  .game-info h3 { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin-bottom:3px; }
+  .game-info p { font-size:12px; color:var(--muted); line-height:1.4; }
+  .game-arrow { margin-left:auto; color:var(--accent); font-size:18px; flex-shrink:0; }
+
+  /* ── GAME SCREEN ── */
+  .game-screen { display:none; padding: 70px 16px 100px; }
+  .game-screen.active { display:block; }
+
+  .game-header {
+    display:flex; align-items:center; gap:10px; margin-bottom:20px;
+  }
+  .back-btn {
+    background:var(--card); border:1px solid var(--border);
+    color:var(--text); border-radius:8px; padding:7px 13px;
+    font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;
+  }
+  .back-btn:active { opacity:0.7; }
+  .game-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; }
+
+  /* ── SCORE STRIP ── */
+  .score-strip {
+    display:flex; gap:8px; margin-bottom:16px;
+  }
+  .sc-box {
+    flex:1; background:var(--card); border:1px solid var(--border);
+    border-radius:10px; padding:8px; text-align:center;
+  }
+  .sc-box .sc-val { font-family:'DM Mono',monospace; font-size:18px; font-weight:500; }
+  .sc-box .sc-lbl { font-size:10px; color:var(--muted); margin-top:2px; }
+  .sc-correct .sc-val { color:var(--green); }
+  .sc-wrong .sc-val { color:var(--red); }
+  .sc-total .sc-val { color:var(--accent); }
+
+  /* ── GENERIC CARD ── */
+  .q-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:16px; margin-bottom:14px;
+  }
+  .q-label { font-size:11px; color:var(--accent); font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
+  .q-text { font-size:15px; line-height:1.5; margin-bottom:14px; }
+
+  /* ── OPTIONS ── */
+  .options { display:flex; flex-direction:column; gap:8px; }
+  .opt-btn {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:12px 14px;
+    font-size:14px; color:var(--text); text-align:left; cursor:pointer;
+    transition:all 0.15s; width:100%; font-family:'DM Sans',sans-serif;
+  }
+  .opt-btn:active { transform:scale(0.98); }
+  .opt-btn.selected { border-color:var(--accent); background:rgba(79,142,247,0.12); color:var(--accent); }
+  .opt-btn.correct { border-color:var(--green); background:rgba(62,207,142,0.12); color:var(--green); }
+  .opt-btn.wrong { border-color:var(--red); background:rgba(247,111,111,0.12); color:var(--red); }
+
+  /* ── NAV BTNS ── */
+  .nav-row { display:flex; gap:10px; margin-top:14px; }
+  .nav-btn {
+    flex:1; padding:13px; border-radius:10px; border:none;
+    font-size:14px; font-weight:600; font-family:'DM Sans',sans-serif;
+    cursor:pointer; transition:opacity 0.15s;
+  }
+  .nav-btn:active { opacity:0.8; }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-secondary { background:var(--card); color:var(--text); border:1px solid var(--border); }
+  .btn-green { background:var(--green); color:#0d0f14; }
+
+  /* ── FEEDBACK ── */
+  .feedback-box {
+    border-radius:10px; padding:12px 14px; margin-top:10px;
+    font-size:13px; line-height:1.5; display:none;
+  }
+  .feedback-box.show { display:block; }
+  .feedback-box.correct { background:rgba(62,207,142,0.1); border:1px solid rgba(62,207,142,0.3); color:var(--green); }
+  .feedback-box.wrong { background:rgba(247,111,111,0.1); border:1px solid rgba(247,111,111,0.3); color:var(--red); }
+
+  /* ── PROGRESS ── */
+  .progress-bar { height:4px; background:var(--border); border-radius:2px; margin-bottom:16px; overflow:hidden; }
+  .progress-fill { height:100%; background:var(--accent); border-radius:2px; transition:width 0.3s; }
+
+  /* ── MEMO PANEL ── */
+  #memo-panel {
+    position:fixed; bottom:0; left:0; right:0; z-index:200;
+    background:var(--surface); border-top:2px solid var(--accent);
+    transform:translateY(100%); transition:transform 0.3s cubic-bezier(.4,0,.2,1);
+    max-height:70vh; overflow-y:auto;
+    border-radius:20px 20px 0 0;
+  }
+  #memo-panel.open { transform:translateY(0); }
+  .memo-header {
+    position:sticky; top:0; background:var(--surface);
+    padding:16px 18px 12px;
+    border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+    border-radius:20px 20px 0 0;
+  }
+  .memo-header h3 { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; }
+  .memo-close {
+    background:var(--card); border:1px solid var(--border);
+    color:var(--text); border-radius:8px; padding:5px 12px;
+    font-size:12px; cursor:pointer;
+  }
+  .memo-body { padding:14px 18px 24px; }
+  .memo-entry {
+    border-bottom:1px solid var(--border); padding:10px 0;
+  }
+  .memo-entry:last-child { border-bottom:none; }
+  .memo-game { font-size:10px; color:var(--accent); text-transform:uppercase; font-weight:600; margin-bottom:3px; }
+  .memo-q { font-size:12px; color:var(--muted); margin-bottom:4px; line-height:1.4; }
+  .memo-a { font-size:13px; color:var(--green); font-weight:500; }
+  .memo-empty { color:var(--muted); font-size:13px; text-align:center; padding:20px 0; }
+  .memo-section-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--accent2); margin:14px 0 6px; }
+
+  /* ── OVERLAY ── */
+  #overlay {
+    position:fixed; inset:0; z-index:150;
+    background:rgba(0,0,0,0.5); display:none;
+  }
+  #overlay.show { display:block; }
+
+  /* ── TAKASHI GAME ── */
+  .island-world {
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .islands-row {
+    display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;
+  }
+  .island {
+    flex-shrink:0;
+    background:var(--card); border:2px solid var(--border);
+    border-radius:50%; width:100px; height:100px;
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; position:relative; cursor:pointer;
+    transition:all 0.2s; flex-direction:column; gap:2px;
+  }
+  .island.active-island { border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,142,247,0.2); }
+  .island.home-island { border-color:var(--green); }
+  .island.dest-island { border-color:var(--accent2); }
+  .island-label { font-size:9px; color:var(--muted); font-weight:600; text-align:center; padding:0 4px; }
+  .island-slots { display:flex; gap:3px; }
+  .island-slot {
+    width:36px; height:36px; border:1px dashed var(--border);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:18px; cursor:pointer; transition:all 0.15s;
+  }
+  .island-slot.has-animal { border-color:transparent; cursor:pointer; }
+  .island-slot.has-animal:active { transform:scale(0.9); }
+  .island-slot.selected-animal { border:2px solid var(--accent); background:rgba(79,142,247,0.15); }
+
+  .takashi-controls { margin-top:12px; }
+  .rules-btn {
+    background:rgba(247,162,79,0.1); border:1px solid var(--accent2);
+    color:var(--accent2); border-radius:8px; padding:8px 14px;
+    font-size:12px; cursor:pointer; width:100%; margin-bottom:10px;
+  }
+  .rules-panel {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:14px; margin-bottom:10px;
+    display:none; font-size:12px; line-height:1.6; color:var(--muted);
+  }
+  .rules-panel.open { display:block; }
+  .rules-panel h4 { color:var(--text); font-size:13px; margin-bottom:8px; }
+  .rules-panel li { margin-left:14px; margin-bottom:4px; }
+  .takashi-msg {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:10px; padding:10px 14px;
+    font-size:13px; color:var(--accent2); margin-bottom:10px; min-height:40px;
+  }
+  .step-counter { font-size:12px; color:var(--muted); text-align:center; margin-bottom:8px; }
+  .reset-btn {
+    background:rgba(247,111,111,0.1); border:1px solid var(--red);
+    color:var(--red); border-radius:8px; padding:8px 14px;
+    font-size:12px; cursor:pointer; width:100%; margin-top:8px;
+  }
+
+  /* ── VOCAB GAME ── */
+  .vocab-container { display:flex; flex-direction:column; gap:10px; }
+  .vocab-word {
+    background:var(--card); border:2px solid var(--border);
+    border-radius:10px; padding:13px 16px;
+    font-size:15px; font-weight:600; cursor:pointer; text-align:center;
+    transition:all 0.15s;
+  }
+  .vocab-word.selected { border-color:var(--accent); background:rgba(79,142,247,0.15); color:var(--accent); }
+  .vocab-word.matched-correct { border-color:var(--green); background:rgba(62,207,142,0.12); color:var(--green); }
+  .vocab-word.matched-wrong { border-color:var(--red); background:rgba(247,111,111,0.12); color:var(--red); }
+  .vocab-images { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+  .vocab-img-btn {
+    background:var(--card); border:2px solid var(--border);
+    border-radius:10px; padding:12px 8px;
+    cursor:pointer; text-align:center; transition:all 0.15s;
+  }
+  .vocab-img-btn:active { transform:scale(0.97); }
+  .vocab-img-btn.selected { border-color:var(--accent2); background:rgba(247,162,79,0.12); }
+  .vocab-img-btn.matched { border-color:var(--green); background:rgba(62,207,142,0.12); }
+  .vocab-img-btn.wrong-match { border-color:var(--red); background:rgba(247,111,111,0.12); }
+  .vocab-img-icon { font-size:32px; display:block; margin-bottom:6px; }
+  .vocab-img-label { font-size:10px; color:var(--muted); }
+
+  /* ── SENTENCE CONSTRUCTION ── */
+  .sentence-area {
+    background:var(--bg); border:2px dashed var(--border);
+    border-radius:10px; padding:14px; min-height:60px;
+    display:flex; flex-wrap:wrap; gap:6px; align-content:flex-start;
+    margin-bottom:10px;
+  }
+  .sentence-area.has-words { border-color:var(--accent); }
+  .word-chip {
+    background:var(--accent); color:#fff;
+    border-radius:6px; padding:6px 10px; font-size:13px; font-weight:500;
+    cursor:pointer; transition:all 0.15s; user-select:none;
+  }
+  .word-chip:active { transform:scale(0.95); }
+  .word-chip.in-bank { background:var(--card); color:var(--text); border:1px solid var(--border); }
+  .word-chip.in-bank:active { border-color:var(--accent); }
+  .word-bank {
+    display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;
+  }
+  .sc-placeholder { color:var(--muted); font-size:13px; font-style:italic; }
+
+  /* ── SPELLING ── */
+  .spelling-words { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+  .spell-item {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:10px; padding:12px 14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .spell-display {
+    font-family:'DM Mono',monospace; font-size:16px; font-weight:500;
+    letter-spacing:3px; flex:1;
+  }
+  .spell-blank { color:var(--accent2); }
+  .spell-status { font-size:18px; }
+  .keyboard {
+    display:flex; flex-direction:column; gap:4px; margin-bottom:14px;
+  }
+  .key-row { display:flex; gap:4px; justify-content:center; }
+  .key-btn {
+    background:var(--card); border:1px solid var(--border);
+    color:var(--text); border-radius:6px;
+    width:30px; height:34px; font-size:13px; font-weight:600;
+    cursor:pointer; transition:all 0.1s; display:flex; align-items:center; justify-content:center;
+    font-family:'DM Mono',monospace;
+  }
+  .key-btn:active { background:var(--accent); color:#fff; transform:scale(0.95); }
+  .spell-active { border-left:3px solid var(--accent); }
+  .spell-solved { opacity:0.5; }
+
+  /* ── CLERICAL ACCURACY ── */
+  .clerical-pair {
+    display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;
+  }
+  .clerical-cell {
+    background:var(--card); border:2px solid var(--border);
+    border-radius:8px; padding:10px 12px; font-size:12px;
+    line-height:1.5; cursor:pointer; transition:all 0.15s;
+  }
+  .clerical-cell.handwritten { font-style:italic; color:var(--muted); }
+  .clerical-cell.selected { border-color:var(--accent); background:rgba(79,142,247,0.1); }
+  .clerical-cell.correct { border-color:var(--green); background:rgba(62,207,142,0.1); }
+  .clerical-cell.wrong { border-color:var(--red); background:rgba(247,111,111,0.1); }
+  .clerical-label { font-size:9px; font-weight:700; text-transform:uppercase; margin-bottom:4px; color:var(--muted); }
+
+  /* ── PROCESS (FLOWCHART) ── */
+  .flowchart {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:14px; margin-bottom:14px; overflow-x:auto;
+  }
+  .flow-title { font-size:11px; color:var(--accent); font-weight:600; text-transform:uppercase; margin-bottom:10px; }
+  .flow-grid {
+    display:flex; flex-direction:column; gap:6px; min-width:260px;
+  }
+  .flow-row { display:flex; align-items:center; gap:6px; }
+  .flow-node {
+    background:var(--green); color:#0d0f14;
+    border-radius:6px; padding:6px 8px; font-size:10px; font-weight:600;
+    text-align:center; white-space:nowrap; line-height:1.3; min-width:80px;
+  }
+  .flow-node.decision { background:var(--accent2); color:#0d0f14; border-radius:50% / 40%; }
+  .flow-node.start { background:var(--accent); color:#fff; }
+  .flow-arrow { color:var(--muted); font-size:14px; flex-shrink:0; }
+  .flow-down { text-align:center; color:var(--muted); font-size:14px; margin:2px auto; }
+
+  /* ── COMPLETE SCREEN ── */
+  .complete-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:24px; text-align:center;
+  }
+  .complete-icon { font-size:48px; margin-bottom:12px; }
+  .complete-title { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; margin-bottom:8px; }
+  .complete-score { font-size:36px; font-family:'DM Mono',monospace; color:var(--green); margin:10px 0; }
+  .complete-sub { color:var(--muted); font-size:13px; margin-bottom:20px; }
+
+  /* ── MEMO FAB ── */
+  #memo-fab {
+    position:fixed; bottom:20px; right:16px; z-index:130;
+    background:var(--accent2); color:#0d0f14;
+    border-radius:50%; width:52px; height:52px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; cursor:pointer; box-shadow:0 4px 20px rgba(247,162,79,0.4);
+    border:none;
+  }
+  #memo-count {
+    position:absolute; top:-4px; right:-4px;
+    background:var(--red); color:#fff; border-radius:50%;
+    width:18px; height:18px; font-size:10px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    display:none;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <h1>⚡ Odyssey Practice</h1>
+  <div class="tb-right">
+    <div id="stopwatch">00:00</div>
+    <button class="tb-btn" id="sw-btn" onclick="toggleStopwatch()">▶ Start</button>
+    <button class="tb-btn" onclick="resetStopwatch()">↺</button>
+  </div>
+</div>
+
+<!-- MAIN MENU -->
+<div id="menu">
+  <div class="menu-title">Part 1<br>Assessment Games</div>
+  <div class="menu-sub">Tap a game to begin practising</div>
+  <div class="game-grid">
+    <div class="game-card" onclick="showGame('takashi')">
+      <div class="game-icon">🏝️</div>
+      <div class="game-info">
+        <h3>TAKASHI – Animal Islands</h3>
+        <p>Move all animals through islands without letting enemies meet</p>
+      </div>
+      <div class="game-arrow">›</div>
+    </div>
+    <div class="game-card" onclick="showGame('vocab')">
+      <div class="game-icon">🔤</div>
+      <div class="game-info">
+        <h3>Vocabulary</h3>
+        <p>Match each word to the correct picture</p>
+      </div>
+      <div class="game-arrow">›</div>
+    </div>
+    <div class="game-card" onclick="showGame('sentence')">
+      <div class="game-icon">✍️</div>
+      <div class="game-info">
+        <h3>Sentence Construction</h3>
+        <p>Arrange scrambled words into a correct sentence</p>
+      </div>
+      <div class="game-arrow">›</div>
+    </div>
+    <div class="game-card" onclick="showGame('spelling')">
+      <div class="game-icon">🔡</div>
+      <div class="game-info">
+        <h3>Spelling</h3>
+        <p>Complete each word with the missing letters</p>
+      </div>
+      <div class="game-arrow">›</div>
+    </div>
+    <div class="game-card" onclick="showGame('clerical')">
+      <div class="game-icon">📋</div>
+      <div class="game-info">
+        <h3>Clerical Accuracy</h3>
+        <p>Identify which entries were captured correctly</p>
+      </div>
+      <div class="game-arrow">›</div>
+    </div>
+    <div class="game-card" onclick="showGame('process')">
+      <div class="game-icon">🔄</div>
+      <div class="game-info">
+        <h3>Process Instructions</h3>
+        <p>Study the flowchart and answer process questions</p>
+      </div>
+      <div class="game-arrow">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     GAME 1: TAKASHI
+════════════════════════════════════ -->
+<div id="takashi" class="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goMenu()">← Back</button>
+    <span class="game-title">🏝️ TAKASHI</span>
+  </div>
+  <div class="score-strip">
+    <div class="sc-box sc-total"><div class="sc-val" id="tak-steps">0</div><div class="sc-lbl">Steps</div></div>
+    <div class="sc-box sc-correct"><div class="sc-val" id="tak-done">0/7</div><div class="sc-lbl">Arrived</div></div>
+  </div>
+
+  <button class="rules-btn" onclick="toggleRules()">📖 Show / Hide Rules</button>
+  <div class="rules-panel" id="rules-panel">
+    <h4>Rules of the Game</h4>
+    <ul>
+      <li>Move one animal at a time, one island forward</li>
+      <li>You can move an animal backwards at any time</li>
+      <li>Cannot move forward unless another animal is with it</li>
+      <li>Enemy rules (islands 1–3 only):<br>
+        🦁 Lion eats everything except 🐘 Elephant & 🐦 Bird<br>
+        🐺 Jackal eats 🐕 Dog & 🐱 Cat<br>
+        🐕 Dog eats 🐱 Cat<br>
+        🐱 Cat & 🐕 Dog eat 🐦 Bird
+      </li>
+    </ul>
+  </div>
+
+  <div class="takashi-msg" id="tak-msg">Select an animal to move</div>
+
+  <div class="island-world" id="island-world"></div>
+  <div class="step-counter">Steps taken: <span id="tak-steps2">0</span></div>
+  <button class="reset-btn" onclick="initTakashi()">↺ Reset Game</button>
+</div>
+
+<!-- ════════════════════════════════════
+     GAME 2: VOCABULARY
+════════════════════════════════════ -->
+<div id="vocab" class="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goMenu()">← Back</button>
+    <span class="game-title">🔤 Vocabulary</span>
+  </div>
+  <div class="score-strip">
+    <div class="sc-box sc-correct"><div class="sc-val" id="vocab-correct">0</div><div class="sc-lbl">Correct</div></div>
+    <div class="sc-box sc-wrong"><div class="sc-val" id="vocab-wrong">0</div><div class="sc-lbl">Wrong</div></div>
+    <div class="sc-box sc-total"><div class="sc-val" id="vocab-q">1/5</div><div class="sc-lbl">Round</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="vocab-prog" style="width:20%"></div></div>
+  <div id="vocab-game"></div>
+  <div class="nav-row">
+    <button class="nav-btn btn-secondary" id="vocab-back-q" onclick="vocabPrev()">← Prev</button>
+    <button class="nav-btn btn-primary" id="vocab-next-q" onclick="vocabNext()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     GAME 3: SENTENCE CONSTRUCTION
+════════════════════════════════════ -->
+<div id="sentence" class="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goMenu()">← Back</button>
+    <span class="game-title">✍️ Sentence</span>
+  </div>
+  <div class="score-strip">
+    <div class="sc-box sc-correct"><div class="sc-val" id="sc-correct">0</div><div class="sc-lbl">Correct</div></div>
+    <div class="sc-box sc-wrong"><div class="sc-val" id="sc-wrong">0</div><div class="sc-lbl">Wrong</div></div>
+    <div class="sc-box sc-total"><div class="sc-val" id="sc-qnum">1/8</div><div class="sc-lbl">Question</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="sc-prog" style="width:12%"></div></div>
+  <div id="sc-game"></div>
+  <div class="nav-row">
+    <button class="nav-btn btn-secondary" onclick="scClear()">Clear</button>
+    <button class="nav-btn btn-primary" onclick="scCheck()">Check ✓</button>
+  </div>
+  <div class="feedback-box" id="sc-feedback"></div>
+  <div class="nav-row" style="margin-top:10px">
+    <button class="nav-btn btn-secondary" onclick="scPrev()">← Prev</button>
+    <button class="nav-btn btn-secondary" onclick="scNext()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     GAME 4: SPELLING
+════════════════════════════════════ -->
+<div id="spelling" class="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goMenu()">← Back</button>
+    <span class="game-title">🔡 Spelling</span>
+  </div>
+  <div class="score-strip">
+    <div class="sc-box sc-correct"><div class="sc-val" id="sp-correct">0</div><div class="sc-lbl">Correct</div></div>
+    <div class="sc-box sc-wrong"><div class="sc-val" id="sp-wrong">0</div><div class="sc-lbl">Wrong</div></div>
+    <div class="sc-box sc-total"><div class="sc-val" id="sp-qnum">1/4</div><div class="sc-lbl">Round</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="sp-prog" style="width:25%"></div></div>
+  <div id="sp-game"></div>
+  <div class="nav-row">
+    <button class="nav-btn btn-secondary" onclick="spPrev()">← Prev</button>
+    <button class="nav-btn btn-secondary" onclick="spNext()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     GAME 5: CLERICAL ACCURACY
+════════════════════════════════════ -->
+<div id="clerical" class="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goMenu()">← Back</button>
+    <span class="game-title">📋 Clerical</span>
+  </div>
+  <div class="score-strip">
+    <div class="sc-box sc-correct"><div class="sc-val" id="cl-correct">0</div><div class="sc-lbl">Correct</div></div>
+    <div class="sc-box sc-wrong"><div class="sc-val" id="cl-wrong">0</div><div class="sc-lbl">Wrong</div></div>
+    <div class="sc-box sc-total"><div class="sc-val" id="cl-qnum">1/4</div><div class="sc-lbl">Round</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="cl-prog" style="width:25%"></div></div>
+  <div id="cl-game"></div>
+  <div class="nav-row">
+    <button class="nav-btn btn-secondary" onclick="clPrev()">← Prev</button>
+    <button class="nav-btn btn-primary" onclick="clCheck()">Check ✓</button>
+    <button class="nav-btn btn-secondary" onclick="clNext()">Next →</button>
+  </div>
+  <div class="feedback-box" id="cl-feedback"></div>
+</div>
+
+<!-- ════════════════════════════════════
+     GAME 6: PROCESS INSTRUCTIONS
+════════════════════════════════════ -->
+<div id="process" class="game-screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goMenu()">← Back</button>
+    <span class="game-title">🔄 Process</span>
+  </div>
+  <div class="score-strip">
+    <div class="sc-box sc-correct"><div class="sc-val" id="pr-correct">0</div><div class="sc-lbl">Correct</div></div>
+    <div class="sc-box sc-wrong"><div class="sc-val" id="pr-wrong">0</div><div class="sc-lbl">Wrong</div></div>
+    <div class="sc-box sc-total"><div class="sc-val" id="pr-qnum">1/6</div><div class="sc-lbl">Question</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="pr-prog" style="width:17%"></div></div>
+
+  <!-- Flowchart always visible -->
+  <div class="flowchart">
+    <div class="flow-title">📊 Shop Process Flowchart</div>
+    <div class="flow-grid">
+      <div class="flow-row">
+        <div class="flow-node start">Check stock</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Place order with supplier</div>
+      </div>
+      <div class="flow-down">↓ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↓</div>
+      <div class="flow-row">
+        <div class="flow-node decision">Has stock?</div>
+        <div class="flow-arrow">NO →</div>
+        <div class="flow-node">Call another supplier</div>
+      </div>
+      <div class="flow-down">YES ↓</div>
+      <div class="flow-row">
+        <div class="flow-node">Stock not arrived → Send reminder</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Supplier delivers</div>
+      </div>
+      <div class="flow-down">↓</div>
+      <div class="flow-row">
+        <div class="flow-node">Pack in storeroom</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Pack on shelves</div>
+      </div>
+      <div class="flow-down">↓</div>
+      <div class="flow-row">
+        <div class="flow-node">Customer picks product</div>
+        <div class="flow-arrow">←</div>
+        <div class="flow-node decision">Shelves empty?</div>
+      </div>
+      <div class="flow-down">↓ (storeroom empty → order again)</div>
+    </div>
+  </div>
+
+  <div id="pr-game"></div>
+  <div class="nav-row">
+    <button class="nav-btn btn-secondary" onclick="prPrev()">← Prev</button>
+    <button class="nav-btn btn-secondary" onclick="prNext()">Next →</button>
+  </div>
+</div>
+
+<!-- MEMO PANEL -->
+<button id="memo-fab" onclick="toggleMemo()">
+  📝
+  <span id="memo-count">0</span>
+</button>
+
+<div id="overlay" onclick="closeMemo()"></div>
+<div id="memo-panel">
+  <div class="memo-header">
+    <h3>📝 Answer Memo</h3>
+    <button class="memo-close" onclick="closeMemo()">Close</button>
+  </div>
+  <div class="memo-body" id="memo-body">
+    <div class="memo-empty">Answer questions to build your memo</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// STOPWATCH
+// ═══════════════════════════════════════
+let swRunning = false, swSeconds = 0, swInterval = null;
+function toggleStopwatch() {
+  if (swRunning) {
+    clearInterval(swInterval);
+    swRunning = false;
+    document.getElementById('sw-btn').textContent = '▶ Start';
+  } else {
+    swInterval = setInterval(() => { swSeconds++; updateSW(); }, 1000);
+    swRunning = true;
+    document.getElementById('sw-btn').textContent = '⏸ Pause';
+  }
+}
+function resetStopwatch() {
+  clearInterval(swInterval); swRunning = false; swSeconds = 0;
+  updateSW(); document.getElementById('sw-btn').textContent = '▶ Start';
+}
+function updateSW() {
+  const m = String(Math.floor(swSeconds/60)).padStart(2,'0');
+  const s = String(swSeconds%60).padStart(2,'0');
+  document.getElementById('stopwatch').textContent = `${m}:${s}`;
+}
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function showGame(id) {
+  document.getElementById('menu').style.display = 'none';
+  document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'takashi') initTakashi();
+  if (id === 'vocab') initVocab();
+  if (id === 'sentence') initSentence();
+  if (id === 'spelling') initSpelling();
+  if (id === 'clerical') initClerical();
+  if (id === 'process') initProcess();
+}
+function goMenu() {
+  document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('menu').style.display = 'block';
+}
+
+// ═══════════════════════════════════════
+// MEMO
+// ═══════════════════════════════════════
+let memoEntries = [];
+function addMemo(game, question, answer) {
+  memoEntries.push({ game, question, answer });
+  renderMemo();
+}
+function renderMemo() {
+  const body = document.getElementById('memo-body');
+  const cnt = document.getElementById('memo-count');
+  if (!memoEntries.length) { body.innerHTML = '<div class="memo-empty">Answer questions to build your memo</div>'; cnt.style.display='none'; return; }
+  cnt.style.display = 'flex';
+  cnt.textContent = memoEntries.length;
+
+  const grouped = {};
+  memoEntries.forEach(e => { if (!grouped[e.game]) grouped[e.game] = []; grouped[e.game].push(e); });
+  let html = '';
+  for (const g in grouped) {
+    html += `<div class="memo-section-title">${g}</div>`;
+    grouped[g].forEach(e => {
+      html += `<div class="memo-entry"><div class="memo-q">${e.question}</div><div class="memo-a">✓ ${e.answer}</div></div>`;
+    });
+  }
+  body.innerHTML = html;
+}
+function toggleMemo() {
+  document.getElementById('memo-panel').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeMemo() {
+  document.getElementById('memo-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ═══════════════════════════════════════
+// GAME 1: TAKASHI
+// ═══════════════════════════════════════
+const ANIMALS = [
+  { id:'elephant', emoji:'🐘', name:'Elephant' },
+  { id:'lion',     emoji:'🦁', name:'Lion' },
+  { id:'bird',     emoji:'🐦', name:'Bird' },
+  { id:'cat',      emoji:'🐱', name:'Cat' },
+  { id:'dog',      emoji:'🐕', name:'Dog' },
+  { id:'jackal',   emoji:'🐺', name:'Jackal' },
+  { id:'donkey',   emoji:'🫏', name:'Donkey' }
+];
+const ENEMIES = {
+  lion:   ['cat','dog','jackal','donkey'],
+  jackal: ['dog','cat'],
+  dog:    ['cat','bird'],
+  cat:    ['bird']
+};
+
+// Islands: 0=home, 1=island1, 2=island2, 3=island3, 4=destination
+let islands = [], selectedAnimal = null, takSteps = 0;
+
+function initTakashi() {
+  islands = [
+    { name:'Home', animals: ANIMALS.map(a=>a.id), max:7, safe:true },
+    { name:'1st Island', animals:[], max:2, safe:false },
+    { name:'2nd Island', animals:[], max:2, safe:false },
+    { name:'3rd Island', animals:[], max:2, safe:false },
+    { name:'Destination', animals:[], max:7, safe:true }
+  ];
+  selectedAnimal = null; takSteps = 0;
+  renderTakashi();
+}
+
+function renderTakashi() {
+  document.getElementById('tak-steps').textContent = takSteps;
+  document.getElementById('tak-steps2').textContent = takSteps;
+  const done = islands[4].animals.length;
+  document.getElementById('tak-done').textContent = done + '/7';
+
+  const world = document.getElementById('island-world');
+  world.innerHTML = '';
+
+  islands.forEach((isl, idx) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'margin-bottom:6px;';
+
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;';
+
+    const islandDiv = document.createElement('div');
+    islandDiv.className = 'island' + (idx===0?' home-island':idx===4?' dest-island':'');
+    islandDiv.style.cssText = 'width:auto;height:auto;border-radius:12px;padding:8px 12px;min-width:80px;';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'island-label';
+    lbl.textContent = isl.name;
+    lbl.style.fontWeight = '700';
+    islandDiv.appendChild(lbl);
+
+    const slots = document.createElement('div');
+    slots.className = 'island-slots';
+    slots.style.flexWrap = 'wrap';
+    slots.style.gap = '4px';
+
+    if (isl.animals.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'font-size:11px;color:var(--muted);padding:4px;';
+      empty.textContent = 'empty';
+      slots.appendChild(empty);
+    }
+
+    isl.animals.forEach(aid => {
+      const a = ANIMALS.find(x => x.id === aid);
+      const slot = document.createElement('div');
+      slot.className = 'island-slot has-animal' + (selectedAnimal === aid ? ' selected-animal' : '');
+      slot.textContent = a.emoji;
+      slot.title = a.name;
+      slot.onclick = () => handleAnimalClick(aid, idx);
+      slots.appendChild(slot);
+    });
+
+    islandDiv.appendChild(slots);
+
+    // Move here button
+    if (selectedAnimal && idx !== islands.findIndex(i => i.animals.includes(selectedAnimal))) {
+      const moveBtn = document.createElement('button');
+      moveBtn.textContent = '→ Move here';
+      moveBtn.style.cssText = 'background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;margin-top:4px;width:100%;';
+      moveBtn.onclick = () => moveAnimal(idx);
+      islandDiv.appendChild(moveBtn);
+    }
+
+    row.appendChild(islandDiv);
+    div.appendChild(row);
+    world.appendChild(div);
+  });
+
+  if (islands[4].animals.length === 7) {
+    document.getElementById('tak-msg').textContent = '🎉 All animals safely arrived! Completed in ' + takSteps + ' steps.';
+    addMemo('TAKASHI', 'Complete the animal transfer puzzle', 'Completed in ' + takSteps + ' steps using safe island transfers');
+  }
+}
+
+function handleAnimalClick(aid, islandIdx) {
+  if (selectedAnimal === aid) { selectedAnimal = null; document.getElementById('tak-msg').textContent = 'Selection cleared'; renderTakashi(); return; }
+  selectedAnimal = aid;
+  const a = ANIMALS.find(x => x.id === aid);
+  document.getElementById('tak-msg').textContent = '✋ Selected: ' + a.emoji + ' ' + a.name + ' — tap an island to move it there';
+  renderTakashi();
+}
+
+function moveAnimal(toIdx) {
+  if (!selectedAnimal) return;
+  const fromIdx = islands.findIndex(i => i.animals.includes(selectedAnimal));
+  if (fromIdx === toIdx) { selectedAnimal = null; renderTakashi(); return; }
+
+  const msg = document.getElementById('tak-msg');
+  const a = ANIMALS.find(x => x.id === selectedAnimal);
+  const toIsl = islands[toIdx];
+  const fromIsl = islands[fromIdx];
+
+  // Rule 1: Only 1 forward at a time
+  if (toIdx > fromIdx && toIdx - fromIdx > 1) { msg.textContent = '❌ Can only move one island forward at a time!'; return; }
+  // Rule 3: Can't move forward unless another animal is with it
+  if (toIdx > fromIdx && fromIdx !== 0 && fromIsl.animals.length < 2) { msg.textContent = '❌ Cannot move forward — need another animal on this island first!'; return; }
+  // Capacity
+  if (toIsl.animals.length >= toIsl.max) { msg.textContent = '❌ Island is full!'; return; }
+  // Enemy check (only on islands 1-3)
+  if (!toIsl.safe) {
+    const enemies = ENEMIES[selectedAnimal] || [];
+    for (const e of enemies) {
+      if (toIsl.animals.includes(e)) {
+        const ev = ANIMALS.find(x=>x.id===e);
+        msg.textContent = `❌ Conflict! ${a.emoji} ${a.name} would be eaten by/eat ${ev.emoji} ${ev.name}!`;
+        return;
+      }
+    }
+    // Also check reverse enemies
+    for (const eid of toIsl.animals) {
+      const eEnemies = ENEMIES[eid] || [];
+      if (eEnemies.includes(selectedAnimal)) {
+        const ev = ANIMALS.find(x=>x.id===eid);
+        msg.textContent = `❌ Conflict! ${ev.emoji} ${ev.name} would eat ${a.emoji} ${a.name}!`;
+        return;
+      }
+    }
+  }
+
+  // Execute move
+  fromIsl.animals = fromIsl.animals.filter(x => x !== selectedAnimal);
+  toIsl.animals.push(selectedAnimal);
+  takSteps++;
+  msg.textContent = `✅ Moved ${a.emoji} ${a.name} to ${toIsl.name}`;
+  selectedAnimal = null;
+  renderTakashi();
+}
+
+function toggleRules() {
+  document.getElementById('rules-panel').classList.toggle('open');
+}
+
+// ═══════════════════════════════════════
+// GAME 2: VOCABULARY
+// ═══════════════════════════════════════
+const vocabRounds = [
+  {
+    words: ['Fireman','Traffic Officer','Bus','Computer Lab','Delivery Truck'],
+    images: [
+      { emoji:'🚌', label:'Bus', match:'Bus' },
+      { emoji:'🚒', label:'Fire engine', match:'Fireman' },
+      { emoji:'👮', label:'Officer', match:'Traffic Officer' },
+      { emoji:'🚛', label:'Truck', match:'Delivery Truck' },
+      { emoji:'🖥️', label:'Computers', match:'Computer Lab' }
+    ]
+  },
+  {
+    words: ['Truck','Car','Cow','Phone','Filing'],
+    images: [
+      { emoji:'📱', label:'Mobile phone', match:'Phone' },
+      { emoji:'🚛', label:'Large truck', match:'Truck' },
+      { emoji:'🚗', label:'Car', match:'Car' },
+      { emoji:'🐄', label:'Cow', match:'Cow' },
+      { emoji:'🗂️', label:'Filing cabinet', match:'Filing' }
+    ]
+  },
+  {
+    words: ['Computer','Mouse','Screen','Money','Laptop'],
+    images: [
+      { emoji:'💻', label:'Laptop', match:'Laptop' },
+      { emoji:'🖥️', label:'Desktop screen', match:'Screen' },
+      { emoji:'🖱️', label:'Computer mouse', match:'Mouse' },
+      { emoji:'💰', label:'Money', match:'Money' },
+      { emoji:'🖳', label:'Computer tower', match:'Computer' }
+    ]
+  },
+  {
+    words: ['Police','Warehouse','Factory','Desk'],
+    images: [
+      { emoji:'🏭', label:'Factory', match:'Factory' },
+      { emoji:'🚔', label:'Police', match:'Police' },
+      { emoji:'🏢', label:'Warehouse', match:'Warehouse' },
+      { emoji:'🪑', label:'Office desk', match:'Desk' }
+    ]
+  },
+  {
+    words: ['Crisis','Refueling','Mining','Planning','Global Business'],
+    images: [
+      { emoji:'⛏️', label:'Mining', match:'Mining' },
+      { emoji:'⛽', label:'Fuel pump', match:'Refueling' },
+      { emoji:'🌍', label:'Globe & people', match:'Global Business' },
+      { emoji:'📋', label:'Planning board', match:'Planning' },
+      { emoji:'⚠️', label:'Emergency', match:'Crisis' }
+    ]
+  }
+];
+
+let vocabIdx = 0, vocabAnswers = {}, vocabCorrectTotal = 0, vocabWrongTotal = 0;
+let vocabSelectedWord = null, vocabSelectedImg = null;
+
+function initVocab() {
+  vocabIdx = 0; vocabAnswers = {}; vocabCorrectTotal = 0; vocabWrongTotal = 0;
+  vocabSelectedWord = null; vocabSelectedImg = null;
+  renderVocab();
+}
+
+function renderVocab() {
+  const round = vocabRounds[vocabIdx];
+  document.getElementById('vocab-q').textContent = (vocabIdx+1)+'/'+vocabRounds.length;
+  document.getElementById('vocab-prog').style.width = ((vocabIdx+1)/vocabRounds.length*100)+'%';
+  document.getElementById('vocab-correct').textContent = vocabCorrectTotal;
+  document.getElementById('vocab-wrong').textContent = vocabWrongTotal;
+
+  const state = vocabAnswers[vocabIdx] || {};
+  let html = '<div class="q-card"><div class="q-label">Match each word to the correct picture</div>';
+  html += '<div class="vocab-container">';
+  round.words.forEach(w => {
+    const isMatched = state[w];
+    let cls = 'vocab-word';
+    if (isMatched === true) cls += ' matched-correct';
+    else if (isMatched === false) cls += ' matched-wrong';
+    else if (vocabSelectedWord === w) cls += ' selected';
+    html += `<div class="${cls}" onclick="vocabSelectWord('${w}')">${w}</div>`;
+  });
+  html += '</div>';
+  html += '<div class="vocab-images">';
+  round.images.forEach((img, i) => {
+    const isMatchedImg = Object.values(state).includes ? null : null; // simple approach
+    let cls = 'vocab-img-btn';
+    if (vocabSelectedImg === i) cls += ' selected';
+    html += `<div class="${cls}" onclick="vocabSelectImg(${i})">
+      <span class="vocab-img-icon">${img.emoji}</span>
+      <span class="vocab-img-label">${img.label}</span>
+    </div>`;
+  });
+  html += '</div></div>';
+  document.getElementById('vocab-game').innerHTML = html;
+}
+
+function vocabSelectWord(w) {
+  vocabSelectedWord = w;
+  vocabSelectedImg = null;
+  renderVocab();
+}
+
+function vocabSelectImg(i) {
+  if (!vocabSelectedWord) { vocabSelectedImg = i; renderVocab(); return; }
+  const round = vocabRounds[vocabIdx];
+  const img = round.images[i];
+  const correct = img.match === vocabSelectedWord;
+  if (!vocabAnswers[vocabIdx]) vocabAnswers[vocabIdx] = {};
+
+  if (correct) {
+    vocabAnswers[vocabIdx][vocabSelectedWord] = true;
+    vocabCorrectTotal++;
+    addMemo('Vocabulary', `What does "${vocabSelectedWord}" look like?`, img.emoji + ' ' + img.label);
+  } else {
+    vocabAnswers[vocabIdx][vocabSelectedWord] = false;
+    vocabWrongTotal++;
+  }
+  vocabSelectedWord = null; vocabSelectedImg = null;
+  renderVocab();
+}
+
+function vocabNext() { if (vocabIdx < vocabRounds.length-1) { vocabIdx++; vocabSelectedWord=null; vocabSelectedImg=null; renderVocab(); } }
+function vocabPrev() { if (vocabIdx > 0) { vocabIdx--; vocabSelectedWord=null; vocabSelectedImg=null; renderVocab(); } }
+
+// ═══════════════════════════════════════
+// GAME 3: SENTENCE CONSTRUCTION
+// ═══════════════════════════════════════
+const sentences = [
+  { words: ['MY','SUPERVISOR','EXPLAINS','WHAT','TO','DO'], answer: 'MY SUPERVISOR EXPLAINS WHAT TO DO' },
+  { words: ['8','HOURS','5','ARE','TO','WORK'], answer: '5 TO 8 HOURS ARE TO WORK' },
+  { words: ['THE','SUPERVISOR','INSTRUCTS','THE','WORKER','WHAT','TO','DO','ON'], answer: 'THE SUPERVISOR INSTRUCTS THE WORKER ON WHAT TO DO' },
+  { words: ['OUR','STRATEGY','NEEDS','TO','HAPPEN','BEFORE','QUARTER','4S','SESSION','END'], answer: 'OUR STRATEGY NEEDS TO HAPPEN BEFORE QUARTER 4S SESSION END' },
+  { words: ['FACTOR','A','IS','COMPETITORS','NOT','PRICING','THE'], answer: 'PRICING IS NOT A COMPETITORS FACTOR' },
+  { words: ['FOR','NEED','SUBMISSION','BY','THE','TO','MONTH','COMPLETED','NEXT','JANUARY','BE','BUDGETS'], answer: 'BUDGETS NEED TO BE COMPLETED BY THE NEXT MONTH FOR JANUARY SUBMISSION' },
+  { words: ['THE','MAN','TRAVELS','TO','WORK','BY','TAXI'], answer: 'THE MAN TRAVELS TO WORK BY TAXI' },
+  { words: ['THE','CONSIGNMENT','NEEDS','TO','BE','DELIVERED'], answer: 'THE CONSIGNMENT NEEDS TO BE DELIVERED' }
+];
+
+let scIdx = 0, scBuilt = [], scAnswered = {}, scCorrect = 0, scWrong = 0;
+
+function initSentence() {
+  scIdx = 0; scBuilt = []; scAnswered = {}; scCorrect = 0; scWrong = 0;
+  renderSentence();
+}
+
+function renderSentence() {
+  const q = sentences[scIdx];
+  document.getElementById('sc-qnum').textContent = (scIdx+1)+'/'+sentences.length;
+  document.getElementById('sc-prog').style.width = ((scIdx+1)/sentences.length*100)+'%';
+  document.getElementById('sc-correct').textContent = scCorrect;
+  document.getElementById('sc-wrong').textContent = scWrong;
+
+  const built = scAnswered[scIdx] ? scAnswered[scIdx].built : (scBuilt.length ? scBuilt : []);
+  const used = new Set(built.map((_,i)=>i));
+
+  // Shuffle words once per question
+  if (!q._shuffled) {
+    q._shuffled = [...q.words].sort(() => Math.random()-0.5);
+  }
+  const bank = q._shuffled.filter(w => !built.includes(w) || built.filter(x=>x===w).length < q.words.filter(x=>x===w).length);
+
+  let html = '<div class="q-card"><div class="q-label">Build the correct sentence</div>';
+  html += '<div class="sentence-area' + (built.length?' has-words':'') + '" id="sc-built">';
+  if (!built.length) html += '<span class="sc-placeholder">Tap words below to build the sentence...</span>';
+  built.forEach((w,i) => {
+    html += `<div class="word-chip" onclick="scRemoveWord(${i})">${w}</div>`;
+  });
+  html += '</div>';
+  html += '<div class="word-bank" id="sc-bank">';
+  const remaining = [...q._shuffled];
+  built.forEach(w => {
+    const idx = remaining.indexOf(w);
+    if (idx !== -1) remaining.splice(idx,1);
+  });
+  remaining.forEach((w,i) => {
+    html += `<div class="word-chip in-bank" onclick="scAddWord('${w}')">${w}</div>`;
+  });
+  html += '</div></div>';
+  document.getElementById('sc-game').innerHTML = html;
+
+  const fb = document.getElementById('sc-feedback');
+  if (scAnswered[scIdx]) {
+    fb.className = 'feedback-box show ' + (scAnswered[scIdx].correct ? 'correct':'wrong');
+    fb.textContent = scAnswered[scIdx].correct ? '✓ Correct! ' + scAnswered[scIdx].answer : '✗ Incorrect. Correct answer: ' + sentences[scIdx].answer;
+  } else {
+    fb.className = 'feedback-box';
+  }
+}
+
+function scAddWord(w) {
+  if (scAnswered[scIdx]) return;
+  scBuilt.push(w);
+  renderSentence();
+}
+function scRemoveWord(i) {
+  if (scAnswered[scIdx]) return;
+  scBuilt.splice(i,1);
+  renderSentence();
+}
+function scClear() { if (!scAnswered[scIdx]) { scBuilt=[]; renderSentence(); } }
+
+function scCheck() {
+  if (scAnswered[scIdx] || !scBuilt.length) return;
+  const answer = scBuilt.join(' ');
+  const correct = answer === sentences[scIdx].answer;
+  scAnswered[scIdx] = { built:[...scBuilt], answer, correct };
+  if (correct) { scCorrect++; addMemo('Sentence Construction', 'Arrange: '+sentences[scIdx].words.join(' | '), answer); }
+  else scWrong++;
+  renderSentence();
+}
+function scNext() { if (scIdx < sentences.length-1) { scIdx++; scBuilt=[]; renderSentence(); } }
+function scPrev() { if (scIdx > 0) { scIdx--; scBuilt=[]; renderSentence(); } }
+
+// ═══════════════════════════════════════
+// GAME 4: SPELLING
+// ═══════════════════════════════════════
+const spRounds = [
+  {
+    words: [
+      { partial:'W_RK', answer:'WORK', missing:'O' },
+      { partial:'T_ME', answer:'TIME', missing:'I' },
+      { partial:'CL_CK', answer:'CLOCK', missing:'O' },
+      { partial:'D_SK', answer:'DESK', missing:'E' },
+      { partial:'BR_AK', answer:'BREAK', missing:'E' }
+    ]
+  },
+  {
+    words: [
+      { partial:'C_R', answer:'CAR', missing:'A' },
+      { partial:'M_SSAGE', answer:'MESSAGE', missing:'E' },
+      { partial:'R_CEPTION', answer:'RECEPTION', missing:'E' },
+      { partial:'S_CURITY', answer:'SECURITY', missing:'E' },
+      { partial:'L_W', answer:'LAW', missing:'A' }
+    ]
+  },
+  {
+    words: [
+      { partial:'STRAT_GY', answer:'STRATEGY', missing:'E' },
+      { partial:'PARAD_GM', answer:'PARADIGM', missing:'I' },
+      { partial:'PROD_CTS', answer:'PRODUCTS', missing:'U' },
+      { partial:'COMP_TITOR', answer:'COMPETITOR', missing:'E' },
+      { partial:'MARK_TING', answer:'MARKETING', missing:'E' }
+    ]
+  },
+  {
+    words: [
+      { partial:'INFLAT_ON', answer:'INFLATION', missing:'I' },
+      { partial:'MANAG_MENT', answer:'MANAGEMENT', missing:'E' },
+      { partial:'DIFFER_NTIATED', answer:'DIFFERENTIATED', missing:'E' },
+      { partial:'SYNER_IES', answer:'SYNERGIES', missing:'G' },
+      { partial:'PROD_CTIVITY', answer:'PRODUCTIVITY', missing:'U' }
+    ]
+  }
+];
+
+let spIdx = 0, spActive = 0, spState = {}, spCorrect = 0, spWrong = 0;
+
+function initSpelling() {
+  spIdx = 0; spActive = 0; spState = {}; spCorrect = 0; spWrong = 0;
+  renderSpelling();
+}
+
+function renderSpelling() {
+  const round = spRounds[spIdx];
+  document.getElementById('sp-qnum').textContent = (spIdx+1)+'/'+spRounds.length;
+  document.getElementById('sp-prog').style.width = ((spIdx+1)/spRounds.length*100)+'%';
+  document.getElementById('sp-correct').textContent = spCorrect;
+  document.getElementById('sp-wrong').textContent = spWrong;
+
+  const key = `${spIdx}`;
+  if (!spState[key]) spState[key] = round.words.map(()=>({solved:false,wrong:false}));
+  const state = spState[key];
+
+  let html = '<div class="q-card"><div class="q-label">Complete each word — tap the missing letter on the keyboard</div>';
+  html += '<div class="spelling-words">';
+  round.words.forEach((w,i) => {
+    let cls = 'spell-item';
+    if (i === spActive && !state[i].solved) cls += ' spell-active';
+    if (state[i].solved) cls += ' spell-solved';
+    const display = state[i].solved
+      ? `<span style="color:var(--green)">${w.answer}</span>`
+      : w.partial.split('').map(c => c==='_' ? `<span class="spell-blank">${state[i].wrong?'✗':'_'}</span>` : c).join('');
+    html += `<div class="${cls}" onclick="spSetActive(${i})">
+      <div class="spell-display">${display}</div>
+      <div class="spell-status">${state[i].solved?'✅':state[i].wrong?'❌':''}</div>
+    </div>`;
+  });
+  html += '</div></div>';
+
+  // Keyboard
+  const rows = ['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
+  html += '<div class="keyboard">';
+  rows.forEach(row => {
+    html += '<div class="key-row">';
+    row.split('').forEach(k => {
+      html += `<div class="key-btn" onclick="spPressKey('${k}')">${k}</div>`;
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  document.getElementById('sp-game').innerHTML = html;
+}
+
+function spSetActive(i) { spActive = i; renderSpelling(); }
+
+function spPressKey(k) {
+  const round = spRounds[spIdx];
+  const key = `${spIdx}`;
+  const state = spState[key];
+  if (spActive >= round.words.length) return;
+  const w = round.words[spActive];
+  if (state[spActive].solved) { spActive = Math.min(spActive+1, round.words.length-1); renderSpelling(); return; }
+  if (k === w.missing) {
+    state[spActive].solved = true; state[spActive].wrong = false;
+    spCorrect++;
+    addMemo('Spelling', `Complete: ${w.partial}`, w.answer);
+    spActive = Math.min(spActive+1, round.words.length-1);
+  } else {
+    state[spActive].wrong = true;
+    spWrong++;
+  }
+  renderSpelling();
+}
+function spNext() { if (spIdx < spRounds.length-1) { spIdx++; spActive=0; renderSpelling(); } }
+function spPrev() { if (spIdx > 0) { spIdx--; spActive=0; renderSpelling(); } }
+
+// ═══════════════════════════════════════
+// GAME 5: CLERICAL ACCURACY
+// ═══════════════════════════════════════
+const clericalRounds = [
+  {
+    label: 'Which entries were captured correctly into the computer?',
+    pairs: [
+      { hand:'1) Lindiwe Radebe, 7 Loan Street, london', typed:'1) Lindiwe Radebe, 7 Loan Street, London', correct:true },
+      { hand:'2) Rashni Kezi, 45 Central avenue, Soweto', typed:'2) Rashi Kezi, 45 Central Avenue, Soweto', correct:false },
+      { hand:'3) Ami You, 76 Shamir Avenue, Singapore', typed:'3) Ami You, 76 Shamir Avenue, Singapore', correct:true },
+      { hand:'4) Allesandro Nanini, Piazza Verdi, Rome', typed:'4) Allesandro Nanini, Piazza Verdi, Rome', correct:true },
+      { hand:'5) Jacque Preller, Gassin, France', typed:'5) Jacque Preler, Gassin, France', correct:false },
+      { hand:'6) Sibongile Mohamne, Zone 4, Thembisa', typed:'6) Sibongile Mohamme, Zone 4, Thembisa', correct:false }
+    ]
+  },
+  {
+    label: 'Which entries were captured correctly into the computer?',
+    pairs: [
+      { hand:'7) Shaun Kelly, 23 Douglas Str, Ireland', typed:'7) Shaun Kelly, 23 Douglas Street, Ireland', correct:true },
+      { hand:'8) Rashid Naidoo, 98 Kashri road, Laudium', typed:'8) Rashid Naidoo, 98 Kashri Street, Laudium', correct:false },
+      { hand:'9) Orri Kamotu, 76 Archi, Japan', typed:'9) Orrie Kamotu, 76 Archi, Japan', correct:false },
+      { hand:'10) Joseph Beki, 23 Kelvin Drive, Sandton', typed:'10) Joseph Beki, 23 Kelvin Drive, Sandton', correct:true },
+      { hand:'11) Adele Peters, 7 Church Str, Cape Town', typed:'11) Adelle Peters, 7 Church Street, Cape Town', correct:false },
+      { hand:'12) Aaron Mohamed, 49 Rising Av, Bloemfontein', typed:'12) Aaron Mohamed, 49 Rising Avenue, Bloemfontein', correct:true }
+    ]
+  },
+  {
+    label: 'Which entries were captured correctly?',
+    pairs: [
+      { hand:'13) Alan Maharaj, 65 Mortemer Rd, Thembisa', typed:'13) Alan Maharaj, 65 Mortemer Road, Thembisa', correct:true },
+      { hand:'14) Charlene Essop, 8 Partridge Road, Durban', typed:'14) Charleane Essop, 8 Partridge Rd, Durban', correct:false },
+      { hand:'15) Lerato Pillay, 15 Pretorius Street, Johannesburg', typed:'15) Lerato Pillay, 16 Pretorius Street, Johannesburg', correct:false },
+      { hand:'16) Mark Naidoo, 98 Milner Road, Port Elizabeth', typed:'16) Mark Naidoo, 98 Milner Road, Port Elizabeth', correct:true },
+      { hand:'17) Nadiya Ismail, 143 Montagu, Polokwane', typed:'17) Nadiya Ismail, 142 Montagu Road, Polokwane', correct:false },
+      { hand:'18) Pam Govender, 55 Sisulu Road, Kimberly', typed:'18) Pam Govender, 55 Sisulu Road, Kimberly', correct:true }
+    ]
+  },
+  {
+    label: 'Which entries were captured correctly?',
+    pairs: [
+      { hand:'25) Bongani Radebe, 51 Zambezi Av, Isando', typed:'25) Bongani Radebe, 51 Zambezi Avenue, Isando', correct:true },
+      { hand:'26) Dimakatso Bopape, 50 Oak Rd, Mokopane', typed:'26) Dimakateso Bopape, 500ak Road, Mokopane', correct:false },
+      { hand:'27) Emma Jamela, 98 First Street, Pretoria', typed:'27) Emma Jamemela, 98 First Street, Pretoria', correct:false },
+      { hand:'28) Geoffery Magagula, 19 Elm Street, Strand', typed:'28) Geoffrey Magagula, 19 Elm Street, Strand', correct:false },
+      { hand:'29) Jabulle Mathebula, 26 Lake Av, Westville', typed:'29) Jabuile Mathebula, 26 Lake Avenue, Westville', correct:false },
+      { hand:'30) Mpho Phungula, 29 Park Road, Witbank', typed:'30) Mpho Phungulla, 29 Park Road, Witbank', correct:false }
+    ]
+  }
+];
+
+let clIdx = 0, clSelected = {}, clChecked = {}, clCorrect = 0, clWrong = 0;
+
+function initClerical() {
+  clIdx = 0; clSelected = {}; clChecked = {}; clCorrect = 0; clWrong = 0;
+  renderClerical();
+}
+
+function renderClerical() {
+  const round = clericalRounds[clIdx];
+  document.getElementById('cl-qnum').textContent = (clIdx+1)+'/'+clericalRounds.length;
+  document.getElementById('cl-prog').style.width = ((clIdx+1)/clericalRounds.length*100)+'%';
+  document.getElementById('cl-correct').textContent = clCorrect;
+  document.getElementById('cl-wrong').textContent = clWrong;
+
+  if (!clSelected[clIdx]) clSelected[clIdx] = new Set();
+  const sel = clSelected[clIdx];
+  const checked = clChecked[clIdx];
+
+  let html = `<div class="q-card"><div class="q-label">${round.label}</div>`;
+  html += '<div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Tap the RIGHT-SIDE (computer) entries that are correctly captured</div>';
+  round.pairs.forEach((pair, i) => {
+    const isSelected = sel.has(i);
+    let typedCls = 'clerical-cell';
+    if (checked) {
+      if (pair.correct && isSelected) typedCls += ' correct';
+      else if (!pair.correct && isSelected) typedCls += ' wrong';
+      else if (pair.correct && !isSelected) typedCls += ' correct';
+    } else if (isSelected) {
+      typedCls += ' selected';
+    }
+    html += `<div class="clerical-pair">
+      <div class="clerical-cell handwritten"><div class="clerical-label">Handwritten</div>${pair.hand}</div>
+      <div class="${typedCls}" onclick="clToggle(${i})"><div class="clerical-label">Computer entry</div>${pair.typed}</div>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('cl-game').innerHTML = html;
+
+  const fb = document.getElementById('cl-feedback');
+  if (checked) {
+    const correctOnes = round.pairs.map((p,i)=>p.correct?i:-1).filter(x=>x>=0);
+    fb.className = 'feedback-box show correct';
+    fb.textContent = '✓ Correct entries: ' + correctOnes.map(i => (i+1)).join(', ') + ' — ' + round.pairs.filter(p=>p.correct).map(p=>p.typed.split(')')[0]+')').join(', ');
+  } else {
+    fb.className = 'feedback-box';
+  }
+}
+
+function clToggle(i) {
+  if (clChecked[clIdx]) return;
+  const sel = clSelected[clIdx];
+  if (sel.has(i)) sel.delete(i); else sel.add(i);
+  renderClerical();
+}
+
+function clCheck() {
+  if (clChecked[clIdx]) return;
+  const round = clericalRounds[clIdx];
+  const sel = clSelected[clIdx];
+  let localCorrect = 0, localWrong = 0;
+  round.pairs.forEach((pair, i) => {
+    if (pair.correct && sel.has(i)) localCorrect++;
+    else if (!pair.correct && sel.has(i)) localWrong++;
+    else if (pair.correct && !sel.has(i)) localWrong++; // missed
+  });
+  clCorrect += localCorrect; clWrong += localWrong;
+  clChecked[clIdx] = true;
+  const correctOnes = round.pairs.filter(p=>p.correct).map(p=>p.typed);
+  correctOnes.forEach(ans => addMemo('Clerical Accuracy', 'Round '+(clIdx+1)+' correct entries', ans));
+  renderClerical();
+}
+
+function clNext() { if (clIdx < clericalRounds.length-1) { clIdx++; renderClerical(); } }
+function clPrev() { if (clIdx > 0) { clIdx--; renderClerical(); } }
+
+// ═══════════════════════════════════════
+// GAME 6: PROCESS INSTRUCTIONS
+// ═══════════════════════════════════════
+const processQs = [
+  { q:'The supplier does not deliver the stock. What do you do?', opts:['Send reminder','Call another supplier','Pack the shelves'], answer:0 },
+  { q:'The supplier does not have the product. What do you do?', opts:['Pack stock on the shelves','Call another supplier','Remind the supplier'], answer:1 },
+  { q:'When do you place an order with a supplier?', opts:['Shelves run empty','Storeroom runs empty','Supplier does not have the product'], answer:0 },
+  { q:'When do you pack product on shelves?', opts:['Storeroom too full','Shelves empty','Customer asks for product not on shelves'], answer:1 },
+  { q:'When do you call another supplier?', opts:['Shelves run empty','Supplier does not have stock','Storeroom runs empty'], answer:1 },
+  { q:'When the supplier delivers the stock, what do you do?', opts:['Pack stock on shelves','Pack stock in storeroom','Provide product to customer'], answer:1 },
+  { q:'When do you send a reminder to the supplier?', opts:['Shelves run empty','Storeroom runs empty','Stock has not arrived'], answer:2 },
+  { q:'The supplier delivers damaged stock. What do you do?', opts:['Call another supplier','Send stock back to supplier','Request replacement stock to be delivered'], answer:2 },
+  { q:'When do you pack stock in storeroom?', opts:['Shelves run empty','Customer asks for product','Supplier delivers product'], answer:2 },
+  { q:'The supplier very often does not have stock. What should you consider?', opts:['Call another supplier','Consider finding a new supplier','Send reminder to supplier'], answer:1 }
+];
+
+let prIdx = 0, prAnswers = {}, prCorrect = 0, prWrong = 0;
+
+function initProcess() {
+  prIdx = 0; prAnswers = {}; prCorrect = 0; prWrong = 0;
+  renderProcess();
+}
+
+function renderProcess() {
+  const q = processQs[prIdx];
+  document.getElementById('pr-qnum').textContent = (prIdx+1)+'/'+processQs.length;
+  document.getElementById('pr-prog').style.width = ((prIdx+1)/processQs.length*100)+'%';
+  document.getElementById('pr-correct').textContent = prCorrect;
+  document.getElementById('pr-wrong').textContent = prWrong;
+
+  const answered = prAnswers[prIdx];
+  let html = `<div class="q-card">
+    <div class="q-label">Question ${prIdx+1} of ${processQs.length}</div>
+    <div class="q-text">${q.q}</div>
+    <div class="options">`;
+  q.opts.forEach((opt, i) => {
+    let cls = 'opt-btn';
+    if (answered !== undefined) {
+      if (i === q.answer) cls += ' correct';
+      else if (i === answered && i !== q.answer) cls += ' wrong';
+    } else if (answered === i) cls += ' selected';
+    html += `<div class="${cls}" onclick="prAnswer(${i})">${opt}</div>`;
+  });
+  html += '</div>';
+  if (answered !== undefined) {
+    const ok = answered === q.answer;
+    html += `<div class="feedback-box show ${ok?'correct':'wrong'}" style="margin-top:10px;">
+      ${ok ? '✓ Correct! ' : '✗ Wrong. '} ${q.opts[q.answer]} is the correct answer.
+    </div>`;
+  }
+  html += '</div>';
+  document.getElementById('pr-game').innerHTML = html;
+}
+
+function prAnswer(i) {
+  if (prAnswers[prIdx] !== undefined) return;
+  prAnswers[prIdx] = i;
+  const q = processQs[prIdx];
+  if (i === q.answer) {
+    prCorrect++;
+    addMemo('Process Instructions', q.q, q.opts[q.answer]);
+  } else {
+    prWrong++;
+  }
+  renderProcess();
+}
+function prNext() { if (prIdx < processQs.length-1) { prIdx++; renderProcess(); } }
+function prPrev() { if (prIdx > 0) { prIdx--; renderProcess(); } }
+</script>
+</body>
+</html>
